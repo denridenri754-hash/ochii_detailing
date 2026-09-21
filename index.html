@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCHII — Premium Detailing Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.6);
+            --bg-color: #060608;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #ffffff;
+            --text-sub: #a1a1aa;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        /* --- BACKGROUND SCENE --- */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 30%, #151a30 0%, #060608 75%);
+            z-index: 1;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        /* --- MAIN APP INTERFACE --- */
+        #app {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+        }
+
+        header {
+            height: 80px;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-toggle {
+            width: 44px;
+            height: 44px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+        }
+
+        .menu-toggle span {
+            width: 18px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        .menu-toggle:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .logo-box img {
+            height: 26px;
+            filter: brightness(0) invert(1);
+        }
+
+        .glass-btn {
+            padding: 10px 22px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .glass-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        /* --- CATEGORY PILLS --- */
+        .category-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            z-index: 20;
+        }
+
+        .cat-pill {
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .cat-pill:hover, .cat-pill.active {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- 3D CAROUSEL SECTION --- */
+        .carousel-viewport {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 90px;
+        }
+
+        .carousel-track {
+            position: relative;
+            width: 360px;
+            height: 480px;
+            transform-style: preserve-3d;
+            cursor: grab;
+        }
+
+        .carousel-track:active { cursor: grabbing; }
+
+        /* 3D CARDS */
+        .card-3d {
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            transition: transform 0.1s linear, opacity 0.3s ease, border-color 0.3s ease;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: transform 0.5s ease;
+        }
+
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10, 10, 14, 0.3) 0%, rgba(10, 10, 14, 0.8) 60%, rgba(6, 6, 8, 0.95) 100%);
+            z-index: 2;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 3;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 28px;
+        }
+
+        .card-3d.active {
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 40px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-3d.active .card-bg-img {
+            transform: scale(1.05);
+        }
+
+        .card-badge {
+            align-self: flex-start;
+            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #60a5fa;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        .card-desc {
+            color: #e2e8f0;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.9);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .card-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .card-price span {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .card-btn {
+            padding: 11px 22px;
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        /* --- BOTTOM DOCK --- */
+        .bottom-dock-container {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(18, 18, 26, 0.75);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 255, 255, 0.05);
+        }
+
+        .dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 52px;
+            border-radius: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            background: transparent;
+            border: none;
+        }
+
+        .dock-icon {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: 0.3s;
+        }
+
+        .dock-item span {
+            font-size: 9px;
+            font-weight: 600;
+            margin-top: 3px;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .dock-item:hover, .dock-item.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
+        }
+
+        /* Специальные стили для синей иконки Instagram */
+        .dock-item.instagram-item {
+            color: var(--primary);
+        }
+
+        .dock-item.instagram-item .dock-icon {
+            stroke: var(--primary);
+            filter: drop-shadow(0 0 6px var(--primary-glow));
+        }
+
+        .dock-item.instagram-item:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        .dock-item.active .dock-icon {
+            stroke: var(--primary);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        .dock-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        .dock-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0 3px;
+        }
+
+        .dock-arrow {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .dock-arrow:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        /* SIDE DRAWER */
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: rgba(12, 12, 16, 0.92);
+            backdrop-filter: blur(35px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 110px 35px 35px;
+            transform: translateX(-100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .side-drawer.open { transform: translateX(0); }
+
+        .drawer-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .drawer-nav a {
+            color: var(--text-sub);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .drawer-nav a:hover { color: #fff; transform: translateX(6px); }
+
+        /* MODALS & OVERLAYS */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.4s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+        .modal-card {
+            width: 480px;
+            max-width: 100%;
+            background: rgba(20, 20, 28, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 32px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 22px;
+            right: 22px;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            z-index: 10;
+        }
+
+        .close-modal:hover { color: #fff; }
+
+        .modal-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+        .modal-subtitle { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 22px; }
+
+        .class-picker { display: flex; gap: 8px; margin-bottom: 18px; }
+        .class-opt {
+            flex: 1; padding: 10px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            color: #fff; font-weight: 700; text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .class-opt.selected { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        
+        .form-input, .form-textarea {
+            width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; outline: none; transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            resize: none;
+            height: 70px;
+        }
+
+        .form-input:focus, .form-textarea:focus { border-color: var(--primary); background: rgba(255,255,255,0.08); }
+
+        .phone-hint {
+            font-size: 10px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        .submit-btn {
+            width: 100%; padding: 14px; background: var(--primary); border: none;
+            color: #fff; font-weight: 700; border-radius: 14px; cursor: pointer; margin-top: 8px;
+            box-shadow: 0 0 25px var(--primary-glow); transition: 0.3s;
+            text-align: center; text-decoration: none; display: inline-block;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 35px var(--primary-glow);
+        }
+
+        /* ABOUT SECTION STYLES */
+        .about-quote {
+            border-left: 3px solid var(--primary);
+            padding: 14px;
+            font-style: italic;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0 14px 14px 0;
+        }
+
+        .quote-author {
+            font-style: normal;
+            font-weight: 700;
+            display: block;
+            margin-top: 8px;
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .about-text {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        /* SUCCESS MODAL STYLES */
+        .success-card {
+            text-align: center;
+            padding: 40px 28px;
+        }
+
+        .success-icon-wrap {
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+            animation: pulseSuccess 2s infinite;
+        }
+
+        @keyframes pulseSuccess {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .success-icon {
+            width: 40px;
+            height: 40px;
+            stroke: var(--success);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .success-details {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .success-details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: var(--text-sub);
+        }
+
+        .success-details-row:last-child { margin-bottom: 0; }
+        .success-details-row span:last-child { color: #fff; font-weight: 600; }
+
+        /* STATIC MAP FRAME STYLES */
+        .static-map-box {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            margin: 16px 0;
+            background: #12141d url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .static-map-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 12, 20, 0.7);
+            backdrop-filter: blur(2px);
+        }
+
+        .map-pin-badge {
+            position: relative;
+            z-index: 2;
+            padding: 10px 18px;
+            background: rgba(20, 20, 30, 0.85);
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 0 25px var(--primary-glow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-info-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+
+        .location-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .location-info-item:last-child { margin-bottom: 0; }
+
+        @media (max-width: 600px) {
+            header { padding: 0 20px; }
+            .carousel-track { width: 300px; height: 430px; }
+            .bottom-dock-container { bottom: 15px; padding: 6px 8px; gap: 2px; }
+            .dock-item { width: 44px; height: 48px; }
+            .dock-item span { font-size: 8px; }
+            .category-bar { flex-wrap: wrap; padding: 0 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ФОН -->
+    <div class="bg-scene">
+        <div class="bg-glow"></div>
+    </div>
+
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div id="app">
+        <header>
+            <div class="nav-left">
+                <div class="menu-toggle" id="menuToggle" onclick="toggleDrawer()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="logo-box">
+                    <img src="logo.jpg" alt="OCHII">
+                </div>
+            </div>
+            <a href="tel:0679991221" class="glass-btn">
+                <span>📞</span> 067 999 12 21
+            </a>
+        </header>
+
+        <!-- КАТЕГОРИИ (ФИЛЬТР) -->
+        <div class="category-bar">
+            <div class="cat-pill active" onclick="filterServices('all', this)">Усі Послуги</div>
+            <div class="cat-pill" onclick="filterServices('polish', this)">Полірування</div>
+            <div class="cat-pill" onclick="filterServices('chem', this)">Хімчистка</div>
+            <div class="cat-pill" onclick="filterServices('ceramic', this)">Кераміка</div>
+        </div>
+
+        <!-- БОКОВОЕ МЕНЮ -->
+        <div class="side-drawer" id="sideDrawer">
+            <div class="drawer-nav">
+                <a href="#" onclick="toggleDrawer(); jumpToSlide(0);">✦ Головна</a>
+                <a href="#" onclick="toggleDrawer(); openAboutModal();">📖 Про нас</a>
+                <a href="#" onclick="toggleDrawer(); openMapModal();">📍 Де ми знаходимось</a>
+                <a href="#" onclick="toggleDrawer(); openOrderModal(activeIndex);">📅 Записатися</a>
+                <a href="https://www.instagram.com/ochii.detailing/" target="_blank" style="color: var(--primary);">📸 Instagram</a>
+            </div>
+            <div style="font-size: 11px; color: var(--text-sub); line-height: 1.5;">
+                📍 Дальницька вулиця, 43/15<br>
+               
+            </div>
+        </div>
+
+        <!-- 3D КАРУСЕЛЬ КАРТОЧЕК -->
+        <div class="carousel-viewport" id="viewport">
+            <div class="carousel-track" id="track"></div>
+        </div>
+
+        <!-- НИЖНЕЕ МЕНЮ (ДОК) -->
+        <div class="bottom-dock-container">
+            <button class="dock-arrow" onclick="rotateCarousel(-1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+
+            <!-- Главная -->
+            <button class="dock-item active" onclick="jumpToSlide(0)" id="dock-home">
+                <svg class="dock-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Головна</span>
+            </button>
+
+            <!-- О нас -->
+            <button class="dock-item" onclick="openAboutModal()" id="dock-about">
+                <svg class="dock-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Про нас</span>
+            </button>
+
+            <!-- Где мы -->
+            <button class="dock-item" onclick="openMapModal()" id="dock-map">
+                <svg class="dock-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Де ми</span>
+            </button>
+
+            <!-- Запись -->
+            <button class="dock-item" onclick="openOrderModal(activeIndex)" id="dock-calc">
+                <svg class="dock-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Запис</span>
+            </button>
+
+            <!-- Синяя иконка Instagram -->
+            <a href="https://www.instagram.com/ochii.detailing/" target="_blank" class="dock-item instagram-item" id="dock-insta">
+                <svg class="dock-icon" viewBox="0 0 24 24">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                <span>Insta</span>
+            </a>
+
+            <!-- Инфо -->
+            <button class="dock-item" onclick="toggleDrawer()" id="dock-info">
+                <svg class="dock-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Інфо</span>
+            </button>
+
+            <div class="dock-divider"></div>
+
+            <button class="dock-arrow" onclick="rotateCarousel(1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: ЗАПИСЬ С ОТПРАВКОЙ НА FORMSPREE -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeModal('orderModal')">✕</button>
+            <div class="modal-title" id="modalServiceName">Назва Послуги</div>
+            <div class="modal-subtitle">Оберіть клас авто та вкажіть ваші дані для запису</div>
+
+            <form action="https://formspree.io/f/xnpqlzen" method="POST" onsubmit="submitOrder(event)" id="orderForm">
+                <input type="hidden" name="Услуга" id="hiddenServiceName">
+                <input type="hidden" name="Класс авто" id="hiddenCarClass" value="S">
+                <input type="hidden" name="Расчетная цена" id="hiddenPrice">
+
+                <div class="form-group">
+                    <label>Клас Автомобіля</label>
+                    <div class="class-picker">
+                        <div class="class-opt selected" onclick="selectClass('S', this)">S</div>
+                        <div class="class-opt" onclick="selectClass('M', this)">M</div>
+                        <div class="class-opt" onclick="selectClass('L', this)">L</div>
+                        <div class="class-opt" onclick="selectClass('XL', this)">XL</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Марка та Модель Авто</label>
+                    <input type="text" name="Автомобиль" id="carModelInput" class="form-input" placeholder="Наприклад: BMW M5, Audi A6" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ваше Ім'я</label>
+                    <input type="text" name="Имя клиента" id="userNameInput" class="form-input" placeholder="Олександр" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Телефон (+380XX XXX XX XX)</label>
+                    <input type="tel" name="Телефон" id="phoneInput" class="form-input" value="+380" required maxlength="13" oninput="validatePhone(this)">
+                    <div class="phone-hint">Формат: +380 та 9 цифр номера</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Коментар / Побажання</label>
+                    <textarea name="Комментарий" id="commentInput" class="form-textarea" placeholder="Вкажіть бажану дату, час або додаткові деталі..."></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Орієнтовна вартість:</label>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="calculatedPrice">120 $</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Підтвердити Запис</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: КАРТА И ЛОКАЦИЯ -->
+    <div class="modal-overlay" id="mapModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeModal('mapModal')">✕</button>
+            <div class="modal-title">Де ми знаходимось</div>
+            <div class="modal-subtitle">Завітайте до нашої студії за адресою</div>
+
+            <div class="location-info-box">
+                <div class="location-info-item">
+                    <span style="color: var(--primary);">📍</span>
+                    <span><strong>Адреса:</strong> Дальницька вулиця, 43/15, Одеса, Одеська область, 65000</span>
+                </div>
+                <div class="location-info-item">
+                    <span style="color: var(--primary);">🕒</span>
+                    <span><strong>Графік:</strong> Пн-Сб: 09:00 — 19:00</span>
+                </div>
+                <div class="location-info-item">
+                    <span style="color: var(--primary);">📞</span>
+                    <span><strong>Телефон:</strong> +380 67 999 12 21</span>
+                </div>
+            </div>
+
+            <div class="static-map-box">
+                <div class="static-map-overlay"></div>
+                <div class="map-pin-badge">
+                    <span>📍 OCHII Studio</span>
+                    <span style="opacity: 0.6; font-weight: 400;">(FM8W+5F Одеса)</span>
+                </div>
+            </div>
+
+            <a href="https://www.google.com/maps/search/?api=1&query=FM8W%2B5F+Odesa" target="_blank" class="submit-btn" style="text-align: center;">
+                🗺️ Побудувати Маршрут в Google Maps
+            </a>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: УСПЕШНАЯ ЗАПИСЬ -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card success-card">
+            <button class="close-modal" onclick="closeModal('successModal')">✕</button>
+            
+            <div class="success-icon-wrap">
+                <svg class="success-icon" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+
+            <div class="modal-title">Дякуємо! Заявку прийнято</div>
+            <div class="modal-subtitle" style="margin-bottom: 12px;">Ми зв'яжемося з вами для підтвердження деталізації</div>
+
+            <div class="success-details">
+                <div class="success-details-row">
+                    <span>Послуга:</span>
+                    <span id="succService">—</span>
+                </div>
+                <div class="success-details-row">
+                    <span>Автомобіль:</span>
+                    <span id="succCar">—</span>
+                </div>
+                <div class="success-details-row">
+                    <span>Клас:</span>
+                    <span id="succClass">—</span>
+                </div>
+                <div class="success-details-row">
+                    <span>Телефон:</span>
+                    <span id="succPhone">—</span>
+                </div>
+                <div class="success-details-row">
+                    <span>Вартість:</span>
+                    <span id="succPrice" style="color: var(--primary);">—</span>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="closeModal('successModal')" style="background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); box-shadow: none;">Зрозуміло</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО: О НАС -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeModal('aboutModal')">✕</button>
+            <div class="modal-title">Про студію OCHII</div>
+            <div class="modal-subtitle">Історія, місія та цінності</div>
+
+            <div class="about-quote">
+                "Я віддав свою першу машину на детейлінг, але не був задоволеним на 100% і тоді я подумав: «можна зробити краще.»"
+                <span class="quote-author">— Владислав, засновник OCHII</span>
+            </div>
+
+            <p class="about-text">
+                Вивчивши ринок та уявивши себе клієнтами, ми зрозуміли, що в Одесі мало детейлінг-студій, які надають справді якісні та безкомпромісні послуги.
+            </p>
+
+            <p class="about-text">
+                Наша студія — це не просто бізнес. Це про творчість, пристрасть до автомобілів та ваші позитивні емоції. Ми працюємо обладнанням <strong>Rupes BigFoot</strong> та першокласною автохімією, даруючи бездоганний вигляд кожному авто.
+            </p>
+
+            <div style="margin-top: 20px; text-align: center; color: var(--primary); font-weight: 700; font-size: 13px; letter-spacing: 1px;">
+                ЧЕКАЄМО НА КОЖНОГО В OCHII
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allServices = [
+            { 
+                id: 1, cat: 'chem', badge: 'Салон + Багажник', title: 'Хімчистка Повна', 
+                desc: 'Глибока очистка шкіри, алькантари та текстилю з озонацією салону.', 
+                img: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 120, M: 150, L: 170, XL: 200 } 
+            },
+            { 
+                id: 2, cat: 'polish', badge: 'Кузов', title: 'Освіжаюче Полірування', 
+                desc: 'Усунення павутинки та відновлення глибокого дзеркального блиску (+50$ за темний колір).', 
+                img: 'img_8799-1-scaled.jpg',
+                prices: { S: 120, M: 150, L: 175, XL: 200 } 
+            },
+            { 
+                id: 3, cat: 'polish', badge: 'Кузов', title: 'Глибоке Полірування', 
+                desc: 'Видалення глибоких подряпин, рисок та дефектів ЛФП (+50$ за темний колір).', 
+                img: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 220, M: 250, L: 300, XL: 350 } 
+            },
+            { 
+                id: 4, cat: 'polish', badge: 'Кузов', title: 'Глибока Діамант', 
+                desc: 'Преміальне багатоетапне полірування з максимальним виведенням глянцю (+50$ за темний колір).', 
+                img: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 280, M: 350, L: 400, XL: 450 } 
+            },
+            { 
+                id: 5, cat: 'ceramic', badge: 'Захист 1 Рік', title: 'Кераміка Silver', 
+                desc: 'Посилений гідрофобний ефект та захист ЛФП від вигорання на сонці.', 
+                img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 150, M: 250, L: 300, XL: 400 } 
+            },
+            { 
+                id: 6, cat: 'ceramic', badge: 'Захист 3 Роки', title: 'Кераміка Gold', 
+                desc: 'Багатошаровий захисний бар\'єр від реагентів, хімії та посліду.', 
+                img: 'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 300, M: 450, L: 550, XL: 700 } 
+            },
+            { 
+                id: 7, cat: 'ceramic', badge: 'Захист 5 Років', title: 'Кераміка Platinum', 
+                desc: 'Максимальна міцність 9H та діамантовий глянцевий блиск.', 
+                img: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 450, M: 650, L: 850, XL: 1000 } 
+            },
+            { 
+                id: 8, cat: 'ceramic', badge: 'Захист 10 Років', title: 'Кераміка Platinum +', 
+                desc: 'Ультимативний довгостроковий багатошаровий керамічний захист кузова.', 
+                img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80',
+                prices: { S: 600, M: 800, L: 1000, XL: 1200 } 
+            }
+        ];
+
+        let currentServices = [...allServices];
+        let activeIndex = 0;
+        let selectedService = null;
+        let currentCarClass = 'S';
+        let startX = 0;
+        let isDragging = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCarousel();
+        });
+
+        function filterServices(category, el) {
+            if (el) {
+                document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+            }
+
+            if (category === 'all') {
+                currentServices = [...allServices];
+            } else {
+                currentServices = allServices.filter(s => s.cat === category);
+            }
+            activeIndex = 0;
+            initCarousel();
+        }
+
+        function initCarousel() {
+            const track = document.getElementById('track');
+            track.innerHTML = '';
+
+            currentServices.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'card-3d';
+                card.innerHTML = `
+                    <img src="${item.img}" class="card-bg-img" alt="${item.title}">
+                    <div class="card-overlay"></div>
+                    <div class="card-content">
+                        <div>
+                            <div class="card-badge">${item.badge}</div>
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-desc">${item.desc}</div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-price">${item.prices.S} <span>$/від</span></div>
+                            <button class="card-btn" onclick="openOrderModal(${index})">Замовити</button>
+                        </div>
+                    </div>
+                `;
+                track.appendChild(card);
+            });
+
+            updateCarousel3D();
+            setupDragEvents();
+        }
+
+        function updateCarousel3D() {
+            const cards = document.querySelectorAll('.card-3d');
+            const total = cards.length;
+
+            cards.forEach((card, i) => {
+                let diff = i - activeIndex;
+
+                if (diff > total / 2) diff -= total;
+                if (diff < -total / 2) diff += total;
+
+                const absDiff = Math.abs(diff);
+
+                const rotateY = diff * -25; 
+                const translateX = diff * 220; 
+                const translateZ = -absDiff * 170;
+                const opacity = absDiff > 2 ? 0 : 1 - absDiff * 0.35;
+
+                card.style.transform = `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg)`;
+                card.style.opacity = opacity;
+                card.style.zIndex = 100 - absDiff;
+
+                card.classList.toggle('active', diff === 0);
+            });
+        }
+
+        function rotateCarousel(dir) {
+            if (currentServices.length === 0) return;
+            activeIndex = (activeIndex + dir + currentServices.length) % currentServices.length;
+            updateCarousel3D();
+        }
+
+        function jumpToSlide(index) {
+            activeIndex = index;
+            updateCarousel3D();
+            setActiveDock('dock-home');
+        }
+
+        function setupDragEvents() {
+            const viewport = document.getElementById('viewport');
+
+            viewport.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - startX;
+                if (Math.abs(deltaX) > 50) {
+                    rotateCarousel(deltaX > 0 ? -1 : 1);
+                    isDragging = false;
+                }
+            });
+
+            window.addEventListener('mouseup', () => isDragging = false);
+
+            viewport.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+            });
+
+            viewport.addEventListener('touchend', (e) => {
+                const deltaX = e.changedTouches[0].clientX - startX;
+                if (Math.abs(deltaX) > 40) {
+                    rotateCarousel(deltaX > 0 ? -1 : 1);
+                }
+            });
+        }
+
+        function toggleDrawer() {
+            document.getElementById('menuToggle').classList.toggle('active');
+            document.getElementById('sideDrawer').classList.toggle('open');
+        }
+
+        function setActiveDock(id) {
+            document.querySelectorAll('.dock-item').forEach(btn => btn.classList.remove('active'));
+            if(id) document.getElementById(id).classList.add('active');
+        }
+
+        function openOrderModal(index) {
+            selectedService = currentServices[index];
+            if (!selectedService) selectedService = currentServices[0];
+            document.getElementById('modalServiceName').innerText = selectedService.title;
+            updatePriceCalc();
+            document.getElementById('orderModal').classList.add('open');
+            setActiveDock('dock-calc');
+        }
+
+        function openAboutModal() {
+            document.getElementById('aboutModal').classList.add('open');
+            setActiveDock('dock-about');
+        }
+
+        function openMapModal() {
+            document.getElementById('mapModal').classList.add('open');
+            setActiveDock('dock-map');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function selectClass(cls, el) {
+            currentCarClass = cls;
+            document.querySelectorAll('.class-opt').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('hiddenCarClass').value = cls;
+            updatePriceCalc();
+        }
+
+        function updatePriceCalc() {
+            if (selectedService) {
+                const price = selectedService.prices[currentCarClass];
+                document.getElementById('calculatedPrice').innerText = `${price} $`;
+                document.getElementById('hiddenServiceName').value = selectedService.title;
+                document.getElementById('hiddenPrice').value = `${price} $`;
+            }
+        }
+
+        function validatePhone(input) {
+            let value = input.value;
+            if (!value.startsWith('+380')) {
+                value = '+380';
+            }
+            let prefix = '+380';
+            let digits = value.slice(4).replace(/\D/g, '');
+            if (digits.length > 9) {
+                digits = digits.slice(0, 9);
+            }
+            input.value = prefix + digits;
+        }
+
+        async function submitOrder(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const phone = document.getElementById('phoneInput').value;
+            const carModel = document.getElementById('carModelInput').value;
+            const price = selectedService.prices[currentCarClass];
+
+            if (phone.length !== 13) {
+                alert('Будь ласка, введіть повний номер телефону у форматі +380XX XXX XX XX.');
+                return;
+            }
+
+            submitBtn.innerText = 'Надсилання...';
+            submitBtn.style.opacity = '0.7';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    document.getElementById('succService').innerText = selectedService.title;
+                    document.getElementById('succCar').innerText = carModel;
+                    document.getElementById('succClass').innerText = currentCarClass;
+                    document.getElementById('succPhone').innerText = phone;
+                    document.getElementById('succPrice').innerText = `${price} $`;
+
+                    closeModal('orderModal');
+                    document.getElementById('successModal').classList.add('open');
+                    form.reset();
+                    document.getElementById('phoneInput').value = '+380';
+                } else {
+                    alert('Помилка при відправці. Спробуйте ще раз.');
+                }
+            } catch (err) {
+                alert('Помилка мережі. Перевірте з\'єднання.');
+            } finally {
+                submitBtn.innerText = 'Підтвердити Запис';
+                submitBtn.style.opacity = '1';
+            }
+        }
+    </script>
+</body>
+</html>
